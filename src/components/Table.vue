@@ -137,7 +137,7 @@
       },
 
       editItemDialog (item) {
-        this.editedIndex = this.items.indexOf(item)
+        this.editedIndex = this.pupils.indexOf(item)
         this.editedItem = Object.assign({}, item)
         this.dialog = true
       },
