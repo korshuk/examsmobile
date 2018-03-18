@@ -1,191 +1,221 @@
 <template>
-    <v-container fluid grid-list-md>
+    <v-container fluid grid-list-xs>
         <loading-indicator v-bind:loading="loading"></loading-indicator>
-        <v-layout row wrap>
-          <v-flex xs12>
-            <h1 class="headline">{{ corps.name }}</h1>
-          </v-flex>
-        </v-layout>
-        <v-layout row wrap>
-          <v-flex xs6 v-if="corps.alias">
-            <v-select
-              :items="corps.places"
-              v-model="selectedPlace"
-              label="Select"
-              single-line
-              combobox
-              item-text="code"
-              item-value="_id"
-            ></v-select>
-          </v-flex>
-           <v-flex xs6>
-            
-          </v-flex>
-        </v-layout>
-        <v-layout column align-center>
+
+        <v-toolbar fixed 
+                  scroll-off-screen
+                  scroll-toolbar-off-screen
+                  v-if="corps.name"
+                  style="top: 56px;">
+            <v-container fluid grid-list-md>  
+              <v-layout row wrap>
+                <v-flex xs4 v-if="corps.places">
+                  <v-select
+                    :items="corps.places"
+                    v-model="selectedPlace"
+                    :attach="true"
+                    label="Select"
+                    single-line
+                    item-text="code"
+                  ></v-select>
+                </v-flex>
+                <v-flex xs4>
+                  <v-select
+                    v-bind:items="selectedPlace.audience"
+                    v-model="selectedAudience"
+                    label="Select"
+                    :attach="true"
+                    single-line
+                    item-text="name"
+                    item-value="_id"
+                  ></v-select>
+                </v-flex>
+                <v-flex xs4 text-xs-right>
+                  <p class="">
+                  {{ corps.name }} 
+                  </p>
+                </v-flex>
+              </v-layout>
+            </v-container>
+        </v-toolbar>
+        
+        
+        <v-layout column align-center style="margin-top: 56px;">
           <v-flex xs12>
               <v-data-table
                   :headers="headers"
-                  :items="items"
+                  :items="pupils"
+                  item-key="_id"
+                  :search="selectedAudience"
                   hide-actions
                   :loading="loading"
                   no-data-text="Ничего не найдено"
-                  class="elevation-1"
               >
                   <v-progress-linear slot="progress" color="blue" indeterminate></v-progress-linear>
                   <template slot="items" slot-scope="props">
-                      <td>
-                        <span v-html="getFIO(props.item)"></span>
-                        <br/>
-                        <span class="grey--text text--darken-2">
-                        {{ props.item.phone }}
-                        </span>
-                        <br/>
-                        <span class="grey--text text--darken-1">
-                        {{ props.item.email }}  
-                        </span>
-                      </td>
-                      <td>
-                        <span v-if="dictionary.places">
-                          {{ dictionary.audiences[props.item.audience].name }}
-                          <br/>
-                          <nobr class="grey--text text--darken-2">
-                            {{ dictionary.places[props.item.place].code }} {{ dictionary.places[props.item.place].name }}
-                          </nobr> 
-                          
-                        </span>
-                      </td>
+                    <pupil-table-row 
+                      v-bind:props="props"
+                      v-on:toggleExpand="toggleExpand"
+                    ></pupil-table-row>
+                  </template>
+                  <template slot="expand" slot-scope="props">
+                    <pupil-table-expand 
+                      v-bind:pupil="props.item"
+                      v-on:toggleEdit="editItemDialog"
+                    ></pupil-table-expand>
                   </template>
               </v-data-table>
+
+              <v-dialog v-model="dialog" max-width="500px">
+                <v-card>
+                  <v-card-title>
+                    <span class="headline"> Статус </span>
+                  </v-card-title>
+                  <v-card-text>
+                    <v-container grid-list-md>
+                      <v-layout wrap>
+                        <v-flex xs12 sm6 md4>
+                          {{editedItem.firstName}}
+                        </v-flex>
+                      </v-layout>
+                    </v-container>
+                  </v-card-text>
+                  <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="blue darken-1" flat @click.native="closeDialog">Cancel</v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-dialog>
           </v-flex>
         </v-layout>
     </v-container>
 </template>
 
 <script>
-  const NONE_PLACE = {
-    _id: '',
-    code: 'All'
-  }
+  import apiService from '@/services/apiService'
+  import CONSTANTS from '@/constants/constants'
 
   export default {
     data () {
       return {
-        loading: false,
+        loading: true,
+        dialog: false,
+        editedIndex: -1,
+        editedItem: {},
+        defaultItem: {},
         corps: {},
-        selectedPlace: '',
-        dictionary: {}, // require('@/components/dataMaps.js'),
-        headers: [
-          {
-            text: 'Абитуриент',
-            align: 'left',
-            value: 'firstName'
-          },
-          { text: 'Аудитория',
-            value: 'audience'
-          }
-        ],
-        items: []
+        selectedPlace: {},
+        selectedAudience: {},
+        headers: CONSTANTS.TABLE_HEADERS,
+        pupils: []
       }
     },
 
     created () {
-      this.fetch(this.$route.query)
       this.fetchCorps()
-      this.fetchDictionary()
-      this.routQuery = this.$route.query
-
-      this.selectedPlace = ''
-      if (this.routQuery.place) {
-        this.selectedPlace = this.routQuery.place
-      }
     },
 
     watch: {
-      selectedPlace: function () {
+      selectedPlace: function (value) {
+        this.$router.push({name: 'Table', query: Object.assign({}, this.$route.query, { place: value._id })})
         this.placeChanged()
+      },
+      dialog (val) {
+        val || this.closeDialog()
       }
     },
 
     methods: {
+      toggleExpand (props) {
+        props.expanded = !props.expanded
+      },
+
       placeChanged () {
-        console.log(this.selectedPlace)
-        this.routQuery.place = this.selectedPlace._id
-        this.fetch(this.routQuery)
+        this.selectedAudience = ''
+
+        this.fetch(this.$route.query)
+      },
+
+      editItemDialog (item) {
+        this.editedIndex = this.items.indexOf(item)
+        this.editedItem = Object.assign({}, item)
+        this.dialog = true
+      },
+
+      closeDialog () {
+        this.dialog = false
+        setTimeout(() => {
+          this.editedItem = Object.assign({}, this.defaultItem)
+          this.editedIndex = -1
+        }, 300)
       },
 
       fetch (params) {
-        const self = this
+        this.loading = true
 
-        self.loading = true
-        self.axios
-          .get('http://localhost:5000/api/pupils', { params: params })
-          .then(onSuccess)
-          .catch(onError)
-
-        function onSuccess (response) {
-          self.loading = false
-          self.items = response.data.sort(sortByAudience)
-        }
-
-        function onError (error) {
-          console.log(error)
-          self.loading = false
-        }
-      },
-
-      fetchDictionary () {
-        const self = this
-        self.axios
-          .get('http://localhost:5000/api/dicionary')
-            .then(onSuccess)
-            .catch(onError)
-
-        function onSuccess (response) {
-          self.dictionary = response.data
-        }
-
-        function onError (error) {
-          console.log(error)
-        }
+        apiService.getPupils(params)
+          .then(this.onPupilsSuccess)
+          .catch(this.onError)
+          .finally(this.loadingEnd)
       },
 
       fetchCorps () {
-        const self = this
-        const corpsAlias = this.$route.query.corps
+        apiService.getCorps(this.$route.query.corps)
+          .then(this.onCorpsSuccess)
+          .catch(this.onError)
+      },
 
-        self.axios
-          .get('http://localhost:5000/api/corpses/' + corpsAlias, { params: self.$route.query })
-          .then(onSuccess)
-          .catch(onError)
+      onPupilsSuccess (response) {
+        this.pupils = response.data
+      },
 
-        function onSuccess (response) {
-          self.corps = response.data
-          if (self.corps.places.length > 1) {
-            self.corps.places.unshift(NONE_PLACE)
-          } else {
-            self.selectedPlace = self.corps.places[0]._id
+      onCorpsSuccess (response) {
+        const routPlace = this.$route.query.place || ''
+        let i = 0
+        let length = response.data.places.length
+        let selectedPlaceIndex = 0
+        let allAudience = []
+
+        this.corps = Object.assign({}, response.data)
+
+        if (length > 1) {
+          this.corps.places.unshift(JSON.parse(JSON.stringify(CONSTANTS.NONE_PLACE)))
+        }
+
+        length = this.corps.places.length
+
+        for (i; i < length; i++) {
+          if (this.corps.places[i]._id === routPlace) {
+            selectedPlaceIndex = i
           }
+
+          allAudience = allAudience.concat(this.corps.places[i].audience)
+
+          this.corps.places[i].audience.unshift(JSON.parse(JSON.stringify(CONSTANTS.NONE_AUDIENCE)))
         }
 
-        function onError (error) {
-          console.log(error)
+        if (length > 1) {
+          this.corps.places[0].audience = this.corps.places[0].audience.concat(allAudience.sort(sortAudienceByName))
         }
+
+        this.selectedPlace = this.corps.places[selectedPlaceIndex]
       },
 
       getFIO (item) {
         return `${item.firstName} ${item.lastName} ${item.parentName}`
+      },
+
+      loadingEnd () {
+        this.loading = false
+      },
+
+      onError (error) {
+        console.log(error)
       }
     }
   }
 
-  function sortByAudience (a, b) {
-    if (a.audience < b.audience) {
-      return -1
-    }
-    if (a.audience > b.audience) {
-      return 1
-    }
-    return 0
+  function sortAudienceByName (a, b) {
+    return a.name >= b.name
   }
 </script>

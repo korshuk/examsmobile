@@ -1,18 +1,16 @@
 <template>
   <v-app>
     
-    <v-toolbar
-      app
-      :clipped-left="false"
-    >
-      <v-btn icon ripple href="#/" v-if="notHome">
+    <v-toolbar app scroll-off-screen class="indigo lighten-1 white--text">
+
+      <v-btn icon ripple href="#/" v-if="notHome" @click="goBack()" class="mx-3 white--text">
         <v-icon>chevron_left</v-icon>
       </v-btn>
 
       <v-toolbar-title v-text="title"></v-toolbar-title>
       <v-spacer></v-spacer>
       
-      <v-btn icon ripple href="#/search">
+      <v-btn icon ripple href="#/search" class="mx-3 white--text">
         <v-icon>search</v-icon>
       </v-btn>
     
@@ -24,8 +22,9 @@
       </v-scale-transition>
     </v-content>
   
-    <v-footer app>
-      <span>&copy; 2017</span>
+    <v-footer app class="pa-3">
+      <v-spacer></v-spacer>
+      <div>&copy; {{ new Date().getFullYear() }}</div>
     </v-footer>
   </v-app>
 </template>
@@ -35,7 +34,7 @@ export default {
   data () {
     return {
       notHome: this.$route.name !== 'Home',
-      title: 'Vuetify.js'
+      title: 'Лицей БГУ'
     }
   },
   name: 'App',
@@ -43,6 +42,18 @@ export default {
   watch: {
     '$route' (to, from) {
       this.notHome = this.$route.name !== 'Home'
+    }
+  },
+
+  methods: {
+    goBack () {
+      if (this.$route.name !== 'Table') {
+        window.history.length > 1
+          ? this.$router.go(-1)
+          : this.$router.push('/')
+      } else {
+        this.$router.push('/')
+      }
     }
   }
 }

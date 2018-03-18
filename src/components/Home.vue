@@ -16,26 +16,41 @@
         >
           <v-card>
             <v-card-title>
-              <v-flex xs6>
-                <h4>{{ props.item.name }}</h4>
+              <v-flex>
+                <h4>{{ props.item.name }} - <span class="headline">{{ props.item.count }}</span></h4>
               </v-flex>
-              <v-flex xs4>
-                <h3 class="headline">{{ props.item.count }} / {{ props.item.max }}</h3>
+              <v-flex>
               </v-flex>
-               <v-flex xs2>
-                  <v-btn icon ripple :href="`#/table?corps=${props.item.alias}`">
+               <v-flex>
+                  <v-btn icon
+                         :href="`#/table?corps=${props.item.alias}`">
                     <v-icon>list</v-icon>
                   </v-btn>
                </v-flex>
-            </v-card-title>         
+            </v-card-title>  
             <v-list>
-              <v-list-group
+              <v-list-tile v-if="props.item.places.length === 1" >
+                <v-list-tile-content>
+                    <v-list-tile-title>
+                      Профиль: 
+                      <b v-for="place in props.item.places" :key="place._id">
+                        {{ place.code}}
+                      </b>
+                    </v-list-tile-title>
+                  </v-list-tile-content>
+              </v-list-tile>
+              
+              <v-list-group v-if="props.item.places.length > 1" 
                 v-model="props.item.active"
               >
                 <v-list-tile slot="activator">
                   <v-list-tile-content>
                     <v-list-tile-title>
-                      Всего - {{ props.item.count }}
+                      Профили: 
+                      <b v-for="(place, index) in props.item.places" :key="place._id">
+                        {{ place.code}}
+                        <span v-if="index !== props.item.places.length - 1">, </span>
+                      </b>
                     </v-list-tile-title>
                   </v-list-tile-content>
                 </v-list-tile>
@@ -43,11 +58,11 @@
                 <v-list-tile v-for="place in props.item.places" :key="place._id">
                   <v-list-tile-content>
                     <v-list-tile-title>
-                      {{ place.code }}
+                      {{ place.code }} 
+                      <span class="grey--text text--darken-2">
+                        ({{ place.count }})
+                      </span>
                     </v-list-tile-title>
-                    <v-list-tile-sub-title>
-                      {{ place.count }} / {{place.max}}
-                    </v-list-tile-sub-title>
                   </v-list-tile-content>
                   <v-list-tile-action>
                     <v-btn icon ripple :href="`#/table?corps=${props.item.alias}&place=${place._id}`">
@@ -126,6 +141,8 @@
 
 
 <script>
+  import apiService from '@/services/apiService'
+  
   export default {
     data () {
       return {
@@ -140,23 +157,24 @@
 
     methods: {
       fetch () {
-        const self = this
+        this.loading = true
 
-        self.loading = true
-        self.axios
-          .get('http://localhost:5000/api/corpses')
-          .then(onSuccess)
-          .catch(onError)
+        apiService.getCorpses()
+          .then(this.onSuccess)
+          .catch(this.onError)
+          .finally(this.loadingEnd)
+      },
 
-        function onSuccess (response) {
-          self.loading = false
-          self.items = response.data
-        }
+      onSuccess (response) {
+        this.items = response.data
+      },
 
-        function onError (error) {
-          console.log(error)
-          self.loading = false
-        }
+      onError (error) {
+        console.log(error)
+      },
+
+      loadingEnd () {
+        this.loading = false
       }
     }
   }
