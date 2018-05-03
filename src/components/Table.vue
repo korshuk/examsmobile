@@ -26,9 +26,16 @@
                     label="Select"
                     :attach="true"
                     single-line
-                    item-text="name"
+                    item-text="`${data.item.name} + bel`"
                     item-value="_id"
-                  ></v-select>
+                  >
+                    <template slot="selection" slot-scope="data">
+                      {{ data.item.name}}{{data.item.bel === true ? ' (бел)' : ''}}
+                    </template>
+                    <template slot="item" slot-scope="data">
+                      {{ data.item.name}}{{data.item.bel === true ? ' (бел)' : ''}}
+                    </template>
+                  </v-select>
                 </v-flex>
                 <v-flex xs4 text-xs-right>
                   <p class="">
@@ -116,9 +123,11 @@
     },
 
     watch: {
+      '$route' (to, from) {
+        this.fetchCorps()
+      },
       selectedPlace: function (value) {
-        this.$router.push({name: 'Table', query: Object.assign({}, this.$route.query, { place: value._id })})
-        this.placeChanged()
+        this.placeChanged(value._id)
       },
       dialog (val) {
         val || this.closeDialog()
@@ -130,10 +139,15 @@
         props.expanded = !props.expanded
       },
 
-      placeChanged () {
+      placeChanged (placeId) {
+        const query = {
+          corps: this.$route.params.corpsAlias,
+          place: placeId
+        }
+
         this.selectedAudience = ''
 
-        this.fetch(this.$route.query)
+        this.fetch(query)
       },
 
       editItemDialog (item) {
@@ -160,7 +174,10 @@
       },
 
       fetchCorps () {
-        apiService.getCorps(this.$route.query.corps)
+        const corpsAlias = this.$route.params.corpsAlias
+
+        apiService
+          .getCorps(corpsAlias)
           .then(this.onCorpsSuccess)
           .catch(this.onError)
       },
@@ -170,7 +187,7 @@
       },
 
       onCorpsSuccess (response) {
-        const routPlace = this.$route.query.place || ''
+        const routPlace = this.$route.params.placeId || ''
         let i = 0
         let length = response.data.places.length
         let selectedPlaceIndex = 0

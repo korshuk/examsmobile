@@ -26,6 +26,16 @@ export default new Router({
       path: '/table',
       name: 'Table',
       component: TableView
+    },
+    {
+      path: '/table/:corpsAlias',
+      name: 'TableCorps',
+      component: TableView
+    },
+    {
+      path: '/table/:corpsAlias/:placeId',
+      name: 'TableCorpsPlace',
+      component: TableView
     }
   ]
 })
