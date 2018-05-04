@@ -3,9 +3,9 @@
         <v-container fill-height fluid>
         <v-layout fill-height>
             <v-flex xs12 align-end flexbox>
-                Профиль: {{ pupil.profile }}
+                Профиль: {{ DICTIONARY.profiles[pupil.profile] }}
             <br/>
-            Телефон: {{ pupil.phone }}
+            Телефон: <a :href="'tel://'+ getPhone(pupil.phone)">+{{ getPhone(pupil.phone) }}</a>
             <br/>
             email: {{ pupil.email }}
             </v-flex>
@@ -23,14 +23,27 @@
 </template>
 
 <script>
+  import dictionaryService from '@/services/dictionaryService'
+  
   export default {
     name: 'pupil-table-expand',
     props: ['pupil'],
-
+    data () {
+      return {
+        DICTIONARY: dictionaryService.getters.DICTIONARY()
+      }
+    },
     methods: {
       toggleEdit () {
         this.$emit('toggleEdit', this.pupil)
+      },
+
+      getPhone (phone) {
+        const x = phone.replace(/\D/g, '').match(/(\d{3})(\d{2})(\d{3})(\d{2})(\d{2})/)
+
+        return `${x[1]}-(${x[2]})-${x[3]}-${x[4]}-${x[5]} `
       }
+
     }
 
   }

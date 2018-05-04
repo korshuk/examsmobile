@@ -5,7 +5,8 @@
         </td>
         <td>
             <span v-if="DICTIONARY.audiences[props.item.audience]">
-                {{ DICTIONARY.audiences[props.item.audience].name }}
+                {{ DICTIONARY.audiences[props.item.audience] }} 
+                {{ props.item.needBel === true ? ' (бел)' : '' }}
             </span>
                 <br/>
             <span v-if="DICTIONARY.places[props.item.place]">    

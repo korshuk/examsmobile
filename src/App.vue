@@ -34,18 +34,16 @@
     </v-navigation-drawer>
 
     <v-toolbar app scroll-off-screen class="indigo lighten-1 white--text">
-      <v-toolbar-side-icon @click.stop="drawer = !drawer" class="white--text"></v-toolbar-side-icon>
       
-      <v-btn icon ripple href="#/" v-if="notHome" @click="goBack()" class="mx-3 white--text">
+      
+      <v-btn icon ripple href="#/" v-if="isSearch" @click="goBack()" class="mx-3 white--text">
         <v-icon>chevron_left</v-icon>
       </v-btn>
 
+      <v-toolbar-side-icon @click.stop="drawer = !drawer" class="white--text"></v-toolbar-side-icon>
+
       <v-toolbar-title v-text="title"></v-toolbar-title>
       <v-spacer></v-spacer>
-      
-      <v-btn icon ripple href="#/search" class="mx-3 white--text">
-        <v-icon>search</v-icon>
-      </v-btn>
     
     </v-toolbar>
   
@@ -55,11 +53,28 @@
       <v-scale-transition name="fade">
         <router-view/>
       </v-scale-transition>
+
+      <v-fab-transition>
+        <v-btn
+          v-if="isTable"
+          :color="'red'"
+          dark
+          fab
+          fixed
+          bottom
+          right
+          href="#/search"
+        >
+          <v-icon>search</v-icon>
+          <v-icon>close</v-icon>
+        </v-btn>
+      </v-fab-transition>
     </v-content>
-  
+    
     <v-footer app class="pa-3">
-      <v-spacer></v-spacer>
+      
       <div>&copy; {{ new Date().getFullYear() }}</div>
+      <v-spacer></v-spacer>
     </v-footer>
   </v-app>
 </template>
@@ -73,6 +88,8 @@ export default {
       drawer: this.$route.name === 'Home',
       loading: true,
       corpses: [],
+      isSearch: this.$route.name === 'Search',
+      isTable: this.$route.name === 'TableCorpsPlace',
       notHome: this.$route.name !== 'Home',
       title: 'Лицей БГУ (экзамены)'
     }
@@ -90,13 +107,15 @@ export default {
 
   watch: {
     '$route' (to, from) {
+      this.isSearch = this.$route.name === 'Search'
       this.notHome = this.$route.name !== 'Home'
+      this.isTable = this.$route.name === 'TableCorpsPlace'
     }
   },
 
   methods: {
     goBack () {
-      if (this.$route.name !== 'Table') {
+      if (this.$route.name !== 'TableCorpsPlace') {
         window.history.length > 1
           ? this.$router.go(-1)
           : this.$router.push('/')
