@@ -14,6 +14,8 @@
                     label="Поиск..."
                     single-line
                     v-model="search"
+                    v-on:input="debounceSearch"
+                    clearable
                     prepend-icon="search"
                     ></v-text-field>
                 </v-flex>
@@ -47,43 +49,41 @@
                   </template>
               </v-data-table>
 
-              <v-dialog v-model="dialog" max-width="500px">
-                <v-card>
-                  <v-card-title>
-                    <span class="headline"> Статус </span>
-                  </v-card-title>
-                  <v-card-text>
-                    <v-container grid-list-md>
-                      <v-layout wrap>
-                        <v-flex xs12 sm6 md4>
-                          {{editedItem.firstName}}
-                        </v-flex>
-                      </v-layout>
-                    </v-container>
-                  </v-card-text>
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="blue darken-1" flat @click.native="closeDialog">Cancel</v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
+              <change-status-dialog
+                v-bind:dialogData="dialogData"
+                v-on:dialogClose="onDialogClosed"
+              ></change-status-dialog>
+
           </v-flex>
         </v-layout>
+        <v-snackbar
+          :timeout='4000'
+          v-model="snackbar"
+        >
+          {{ snackbarText }}
+          <v-btn dark flat @click.native="snackbar = false">Закрыть</v-btn>
+        </v-snackbar>
     </v-container>
 </template>
 
 <script>
   import apiService from '@/services/apiService'
   import CONSTANTS from '@/constants/constants'
-
+  var debounce = require('debounce')
+  
   export default {
     data () {
       return {
         search: '',
         loading: false,
-        dialog: false,
-        editedIndex: -1,
-        editedItem: {},
+        snackbar: false,
+        snackbarText: CONSTANTS.SNACKBAR_SUCCESS,
+        dialogData: {
+          show: false,
+          editedIndex: -1,
+          editedItem: {},
+          selectedExamStatus: '0'
+        },
         defaultItem: {},
         headers: CONSTANTS.TABLE_HEADERS,
         items: []
@@ -91,31 +91,36 @@
     },
 
     watch: {
-      search () {
-        this.fetch()
-      },
-      dialog (val) {
-        val || this.closeDialog()
+      search (val) {
+        this.debounceSearch()
       }
     },
 
     methods: {
+      debounceSearch: debounce(function (e) {
+        this.fetch()
+      }, 500),
+
       toggleExpand (props) {
         props.expanded = !props.expanded
       },
 
-      editItemDialog (item) {
-        this.editedIndex = this.items.indexOf(item)
-        this.editedItem = Object.assign({}, item)
-        this.dialog = true
+      onDialogClosed (data) {
+        this.items[data.editedIndex].examStatus = data.pupil.examStatus
+        if (data.sneckbarText !== '') {
+          this.fetch()
+          this.snackbarText = data.sneckbarText
+          this.snackbar = true
+        }
       },
 
-      closeDialog () {
-        this.dialog = false
-        setTimeout(() => {
-          this.editedItem = Object.assign({}, this.defaultItem)
-          this.editedIndex = -1
-        }, 300)
+      editItemDialog (item) {
+        item.examStatus = item.examStatus || '0'
+        this.dialogData = {
+          editedIndex: this.items.indexOf(item),
+          editedItem: Object.assign({}, item),
+          show: true
+        }
       },
 
       fetch () {
@@ -123,7 +128,7 @@
 
         self.loading = true
 
-        apiService.search(self.search)
+        apiService.search(self.search || '')
           .then(self.onSuccess)
           .catch(self.onError)
           .finally(self.loadingEnd)

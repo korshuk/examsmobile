@@ -15,6 +15,9 @@
                 </nobr> 
             </span>
         </td>
+        <td>
+            <v-icon v-if="props.item.examStatus > 0" color="red">info</v-icon>
+        </td>
     </tr>
 
 </template>

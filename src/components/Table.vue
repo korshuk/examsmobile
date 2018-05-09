@@ -9,7 +9,7 @@
                   style="top: 56px;">
             <v-container fluid grid-list-md>  
               <v-layout row wrap>
-                <v-flex xs4 v-if="corps.places">
+                <v-flex xs6 v-if="corps.places">
                   <v-select
                     :items="corps.places"
                     v-model="selectedPlace"
@@ -19,7 +19,7 @@
                     item-text="code"
                   ></v-select>
                 </v-flex>
-                <v-flex xs4>
+                <v-flex xs6>
                   <v-select
                     v-bind:items="selectedPlace.audience"
                     v-model="selectedAudience"
@@ -36,11 +36,6 @@
                       {{ data.item.name}}{{data.item.bel === true ? ' (бел)' : ''}}
                     </template>
                   </v-select>
-                </v-flex>
-                <v-flex xs4 text-xs-right>
-                  <p class="">
-                  {{ corps.name }} 
-                  </p>
                 </v-flex>
               </v-layout>
             </v-container>
@@ -73,29 +68,20 @@
                   </template>
               </v-data-table>
 
-              <v-dialog v-model="dialog" max-width="500px">
-                <v-card>
-                  <v-card-title>
-                    <span class="headline"> Статус </span>
-                  </v-card-title>
-                  <v-card-text>
-                    <v-container grid-list-md>
-                      <v-layout wrap>
-                        <v-flex xs12>
-                          {{ `${editedItem.firstName} ${editedItem.lastName} ${editedItem.parentName}`}}
-                        </v-flex>
-                      </v-layout>
-                    </v-container>
-                  </v-card-text>
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="primary">Primary</v-btn>
-                    <v-btn color="blue darken-1" flat @click.native="closeDialog">Cancel</v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
+              <change-status-dialog
+                v-bind:dialogData="dialogData"
+                v-on:dialogClose="onDialogClosed"
+              ></change-status-dialog>
+             
           </v-flex>
         </v-layout>
+        <v-snackbar
+          :timeout='4000'
+          v-model="snackbar"
+        >
+          {{ snackbarText }}
+          <v-btn dark flat @click.native="snackbar = false">Закрыть</v-btn>
+        </v-snackbar>
     </v-container>
 </template>
 
@@ -107,9 +93,14 @@
     data () {
       return {
         loading: true,
-        dialog: false,
-        editedIndex: -1,
-        editedItem: {},
+        snackbar: false,
+        snackbarText: CONSTANTS.SNACKBAR_SUCCESS,
+        dialogData: {
+          show: false,
+          editedIndex: -1,
+          editedItem: {},
+          selectedExamStatus: '0'
+        },
         defaultItem: {},
         corps: {},
         selectedPlace: {},
@@ -129,13 +120,28 @@
       },
       selectedPlace: function (value) {
         this.placeChanged(value._id)
-      },
-      dialog (val) {
-        val || this.closeDialog()
       }
     },
 
     methods: {
+      onDialogClosed (data) {
+        this.pupils[data.editedIndex].examStatus = data.pupil.examStatus
+        if (data.sneckbarText !== '') {
+          this.fetchCorps()
+          this.snackbarText = data.sneckbarText
+          this.snackbar = true
+        }
+      },
+
+      editItemDialog (item) {
+        item.examStatus = item.examStatus || '0'
+        this.dialogData = {
+          editedIndex: this.pupils.indexOf(item),
+          editedItem: Object.assign({}, item),
+          show: true
+        }
+      },
+
       toggleExpand (props) {
         props.expanded = !props.expanded
       },
@@ -149,20 +155,6 @@
         this.selectedAudience = ''
 
         this.fetch(query)
-      },
-
-      editItemDialog (item) {
-        this.editedIndex = this.pupils.indexOf(item)
-        this.editedItem = Object.assign({}, item)
-        this.dialog = true
-      },
-
-      closeDialog () {
-        this.dialog = false
-        setTimeout(() => {
-          this.editedItem = Object.assign({}, this.defaultItem)
-          this.editedIndex = -1
-        }, 300)
       },
 
       fetch (params) {
@@ -228,6 +220,8 @@
       },
 
       onError (error) {
+        this.snackbarText = CONSTANTS.SNACKBAR_ERROR
+        this.snackbar = true
         console.log(error)
       }
     }

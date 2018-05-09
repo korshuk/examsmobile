@@ -7,16 +7,16 @@
       v-model="drawer"
       app
     >
-      <v-layout
-        row
-        align-center
-      >
-        <v-flex xs12>
-          <v-subheader>
-            Список Корпусов
-          </v-subheader>
-        </v-flex>
-      </v-layout>
+      <v-toolbar flat>
+        <v-list>
+          <v-list-tile>
+            <v-list-tile-title class="title">
+              Список Корпусов
+            </v-list-tile-title>
+        </v-list-tile>
+      </v-list>
+      </v-toolbar>
+     <v-divider></v-divider>
       <v-list
         dense
         class="grey lighten-4"
@@ -42,12 +42,15 @@
 
       <v-toolbar-side-icon @click.stop="drawer = !drawer" class="white--text"></v-toolbar-side-icon>
 
-      <v-toolbar-title v-text="title"></v-toolbar-title>
+      <v-toolbar-title>{{DICTIONARY.corpses && DICTIONARY.corpses[title]}}</v-toolbar-title>
       <v-spacer></v-spacer>
-    
+      
+      <v-btn icon ripple v-if="isTable" href="#/search" class="mx-3 white--text">
+        <v-icon>search</v-icon>
+      </v-btn>
     </v-toolbar>
   
-    <v-content>   
+    <v-content v-scroll="onScroll">   
       <loading-indicator v-bind:loading="loading"></loading-indicator>
 
       <v-scale-transition name="fade">
@@ -56,17 +59,13 @@
 
       <v-fab-transition>
         <v-btn
-          v-if="isTable"
-          :color="'red'"
-          dark
+          v-if="offsetTop > 50"
+          :color="'purple'" dark
           fab
-          fixed
-          bottom
-          right
-          href="#/search"
+          fixed bottom right
+          @click="scrollToTop"
         >
-          <v-icon>search</v-icon>
-          <v-icon>close</v-icon>
+          <v-icon>keyboard_arrow_up</v-icon>
         </v-btn>
       </v-fab-transition>
     </v-content>
@@ -81,6 +80,7 @@
 
 <script>
 import apiService from '@/services/apiService'
+import dictionaryService from '@/services/dictionaryService'
 
 export default {
   data () {
@@ -91,13 +91,19 @@ export default {
       isSearch: this.$route.name === 'Search',
       isTable: this.$route.name === 'TableCorpsPlace',
       notHome: this.$route.name !== 'Home',
-      title: 'Лицей БГУ (экзамены)'
+      title: '',
+      DICTIONARY: {},
+      offsetTop: 0
     }
   },
   name: 'App',
 
   created () {
-    console.log('app.created')
+    if (this.isTable) {
+      this.title = this.$route.params.corpsAlias
+    } else {
+      this.title = ''
+    }
 
     apiService.getCorpses()
           .then(this.onSuccess)
@@ -110,6 +116,11 @@ export default {
       this.isSearch = this.$route.name === 'Search'
       this.notHome = this.$route.name !== 'Home'
       this.isTable = this.$route.name === 'TableCorpsPlace'
+      if (this.isTable) {
+        this.title = this.$route.params.corpsAlias
+      } else {
+        this.title = ''
+      }
     }
   },
 
@@ -124,8 +135,20 @@ export default {
       }
     },
 
+    onScroll (e) {
+      this.offsetTop = window.pageYOffset || document.documentElement.scrollTop
+    },
+
+    scrollToTop () {
+      return document.documentElement.scroll({
+        top: 0,
+        behavior: 'smooth'
+      })
+    },
+
     onSuccess (response) {
       this.corpses = response.data
+      this.DICTIONARY = dictionaryService.getters.DICTIONARY()
     },
 
     onError (error) {

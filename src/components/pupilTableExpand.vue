@@ -8,6 +8,10 @@
             Телефон: <a :href="'tel://'+ getPhone(pupil.phone)">+{{ getPhone(pupil.phone) }}</a>
             <br/>
             email: {{ pupil.email }}
+            <span v-if="pupil.examStatus > 0" class="red--text">
+              <br/>
+              <b>{{EXAM_STATUSES[pupil.examStatus]}}</b>
+            </span>
             </v-flex>
             <v-btn icon 
                     absolute
@@ -24,13 +28,15 @@
 
 <script>
   import dictionaryService from '@/services/dictionaryService'
-  
+  import CONSTANTS from '@/constants/constants'
+
   export default {
     name: 'pupil-table-expand',
     props: ['pupil'],
     data () {
       return {
-        DICTIONARY: dictionaryService.getters.DICTIONARY()
+        DICTIONARY: dictionaryService.getters.DICTIONARY(),
+        EXAM_STATUSES: CONSTANTS.EXAM_STATUSES
       }
     },
     methods: {
