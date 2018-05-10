@@ -2,9 +2,7 @@
     <v-container grid-list-xs>
         <loading-indicator v-bind:loading="loading"></loading-indicator>
         
-        <v-toolbar fixed 
-                  scroll-off-screen
-                  scroll-toolbar-off-screen
+        <v-toolbar fixed
                   style="top: 56px;">
             <v-container fluid grid-list-md>  
               <v-layout row align-center>

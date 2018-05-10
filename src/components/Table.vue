@@ -3,8 +3,6 @@
         <loading-indicator v-bind:loading="loading"></loading-indicator>
 
         <v-toolbar fixed 
-                  scroll-off-screen
-                  scroll-toolbar-off-screen
                   v-if="corps.name"
                   style="top: 56px;">
             <v-container fluid grid-list-md>  
@@ -75,6 +73,7 @@
              
           </v-flex>
         </v-layout>
+        
         <v-snackbar
           :timeout='4000'
           v-model="snackbar"

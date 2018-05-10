@@ -33,7 +33,7 @@
       </v-list>
     </v-navigation-drawer>
 
-    <v-toolbar app scroll-off-screen class="indigo lighten-1 white--text">
+    <v-toolbar app class="indigo lighten-1 white--text">
       
       
       <v-btn icon ripple href="#/" v-if="isSearch" @click="goBack()" class="mx-3 white--text">
