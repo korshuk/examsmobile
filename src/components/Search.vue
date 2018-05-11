@@ -34,6 +34,7 @@
                   <v-progress-linear slot="progress" color="teal" indeterminate></v-progress-linear>
                   <template slot="items" slot-scope="props">
                     <pupil-table-row 
+                      type="search"
                       v-bind:props="props"
                       v-bind:searchQuery="search"
                       v-on:toggleExpand="toggleExpand"

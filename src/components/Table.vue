@@ -15,7 +15,14 @@
                     label="Select"
                     single-line
                     item-text="code"
-                  ></v-select>
+                  >
+                    <template slot="selection" slot-scope="data">
+                      {{ data.item.code}}{{data.item.count ? ' - ' + data.item.count + 'ч.' : ''}}                    
+                    </template>
+                    <template slot="item" slot-scope="data">
+                      {{ data.item.code}}{{data.item.count ? ' - ' + data.item.count + 'ч.' : ''}}
+                    </template>
+                  </v-select>
                 </v-flex>
                 <v-flex xs6>
                   <v-select
@@ -28,10 +35,10 @@
                     item-value="_id"
                   >
                     <template slot="selection" slot-scope="data">
-                      {{ data.item.name}}{{data.item.bel === true ? ' (бел)' : ''}}
+                      {{ data.item.name}}{{data.item.bel === true ? ' (бел)' : ''}}{{data.item.count ? ' - ' + data.item.count + 'ч.' : ''}}
                     </template>
                     <template slot="item" slot-scope="data">
-                      {{ data.item.name}}{{data.item.bel === true ? ' (бел)' : ''}}
+                      {{ data.item.name}}{{data.item.bel === true ? ' (бел)' : ''}}{{data.item.count ? ' - ' + data.item.count + 'ч.' : ''}}
                     </template>
                   </v-select>
                 </v-flex>
@@ -54,6 +61,7 @@
                   <v-progress-linear slot="progress" color="blue" indeterminate></v-progress-linear>
                   <template slot="items" slot-scope="props">
                     <pupil-table-row 
+                      type="simple"
                       v-bind:props="props"
                       v-on:toggleExpand="toggleExpand"
                     ></pupil-table-row>

@@ -18,25 +18,36 @@
       </v-toolbar>
      <v-divider></v-divider>
       <v-list
+        three-line
         dense
         class="grey lighten-4"
       >
-        <template v-for="(corps) in corpses">
-          <v-list-tile :key="corps.alias" :href="`#/table/${corps.alias}/all`">
+        <span v-for="(corps) in corpses" v-bind:key="corps.alias" >
+          <v-list-tile 
+            :href="`#/table/${corps.alias}/all`">
             <v-list-tile-content>
               <v-list-tile-title>
-                {{ corps.name }}
+                {{ corps.name }}                
               </v-list-tile-title>
+              <v-list-tile-sub-title v-for="(place) in corps.places" v-bind:key="place._id">
+                  {{place.code}} ({{place.count}})
+              </v-list-tile-sub-title>
             </v-list-tile-content>
+            <v-list-tile-action>
+              <v-btn icon ripple>
+                <v-icon color="grey lighten-1">arrow_forward_ios</v-icon>
+              </v-btn>
+            </v-list-tile-action>
           </v-list-tile>
-        </template>
+          <v-divider v-bind:key="corps.alias"></v-divider>
+        </span>
       </v-list>
     </v-navigation-drawer>
 
     <v-toolbar app class="indigo lighten-1 white--text">
       
       
-      <v-btn icon ripple href="#/" v-if="isSearch" @click="goBack()" class="mx-3 white--text">
+      <v-btn icon ripple v-if="isSearch" @click="goBack()" class="mx-3 white--text">
         <v-icon>chevron_left</v-icon>
       </v-btn>
 

@@ -8,10 +8,16 @@
                 {{ DICTIONARY.audiences[props.item.audience] }} 
                 {{ props.item.needBel === true ? ' (бел)' : '' }}
             </span>
-                <br/>
+            <br/>
             <span v-if="DICTIONARY.places[props.item.place]">    
                 <nobr class="grey--text text--darken-2">
                 {{ DICTIONARY.places[props.item.place].code }}
+                </nobr> 
+            </span>
+            <span v-if="type === 'search' && DICTIONARY.corpses[props.item.corps]">
+                <br/>
+                <nobr class="grey--text text--darken-2">
+                {{ DICTIONARY.corpses[props.item.corps] }}
                 </nobr> 
             </span>
         </td>
@@ -29,7 +35,8 @@
     name: 'pupil-table-row',
     props: [
       'props',
-      'searchQuery'
+      'searchQuery',
+      'type'
     ],
     data () {
       return {
