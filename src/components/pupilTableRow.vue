@@ -22,7 +22,9 @@
             </span>
         </td>
         <td>
-            <v-icon v-if="props.item.examStatus > 0" color="red">info</v-icon>
+            <v-icon v-if="props.item.examStatus > 0" color="red">
+              {{ EXAM_ICONS[props.item.examStatus] }}
+            </v-icon>
         </td>
     </tr>
 
@@ -30,6 +32,7 @@
 
 <script>
   import dictionaryService from '@/services/dictionaryService'
+  import CONSTANTS from '@/constants/constants'
 
   export default {
     name: 'pupil-table-row',
@@ -40,7 +43,8 @@
     ],
     data () {
       return {
-        DICTIONARY: dictionaryService.getters.DICTIONARY()
+        DICTIONARY: dictionaryService.getters.DICTIONARY(),
+        EXAM_ICONS: CONSTANTS.EXAM_ICONS
       }
     },
 

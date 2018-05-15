@@ -44,6 +44,7 @@
                     <pupil-table-expand 
                       v-bind:pupil="props.item"
                       v-on:toggleEdit="editItemDialog"
+                      v-on:toggleShowPass="showPassDialog"
                     ></pupil-table-expand>
                   </template>
               </v-data-table>
@@ -62,6 +63,11 @@
           {{ snackbarText }}
           <v-btn dark flat @click.native="snackbar = false">Закрыть</v-btn>
         </v-snackbar>
+         <viewer :images="showPassImg"
+                :options="options" 
+                @inited="inited">
+          <img style="display:none" v-for="src in showPassImg" :src="src" :key="src">
+        </viewer>
     </v-container>
 </template>
 
@@ -83,9 +89,11 @@
           editedItem: {},
           selectedExamStatus: '0'
         },
+        showPassImg: [],
         defaultItem: {},
         headers: CONSTANTS.TABLE_HEADERS,
-        items: []
+        items: [],
+        options: CONSTANTS.VIEWER_OPTIONS
       }
     },
 
@@ -99,6 +107,19 @@
       debounceSearch: debounce(function (e) {
         this.fetch()
       }, 500),
+
+      inited (viewer) {
+        this.$viewer = viewer
+      },
+
+      showPassDialog (item) {
+        this.showPassImg = [CONSTANTS.LYCEUM_URL + item.requestImg]
+        setTimeout(this.showViewer)
+      },
+
+      showViewer () {
+        this.$viewer.show()
+      },
 
       toggleExpand (props) {
         props.expanded = !props.expanded

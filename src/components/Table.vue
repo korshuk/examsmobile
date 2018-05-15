@@ -70,6 +70,7 @@
                     <pupil-table-expand 
                       v-bind:pupil="props.item"
                       v-on:toggleEdit="editItemDialog"
+                      v-on:toggleShowPass="showPassDialog"
                     ></pupil-table-expand>
                   </template>
               </v-data-table>
@@ -78,6 +79,7 @@
                 v-bind:dialogData="dialogData"
                 v-on:dialogClose="onDialogClosed"
               ></change-status-dialog>
+             
              
           </v-flex>
         </v-layout>
@@ -89,6 +91,12 @@
           {{ snackbarText }}
           <v-btn dark flat @click.native="snackbar = false">Закрыть</v-btn>
         </v-snackbar>
+
+        <viewer :images="showPassImg"
+                :options="options" 
+                @inited="inited">
+          <img style="display:none" v-for="src in showPassImg" :src="src" :key="src">
+        </viewer>
     </v-container>
 </template>
 
@@ -108,12 +116,14 @@
           editedItem: {},
           selectedExamStatus: '0'
         },
+        showPassImg: [],
         defaultItem: {},
         corps: {},
         selectedPlace: {},
         selectedAudience: {},
         headers: CONSTANTS.TABLE_HEADERS,
-        pupils: []
+        pupils: [],
+        options: CONSTANTS.VIEWER_OPTIONS
       }
     },
 
@@ -131,6 +141,9 @@
     },
 
     methods: {
+      inited (viewer) {
+        this.$viewer = viewer
+      },
       onDialogClosed (data) {
         this.pupils[data.editedIndex].examStatus = data.pupil.examStatus
         if (data.sneckbarText !== '') {
@@ -147,6 +160,17 @@
           editedItem: Object.assign({}, item),
           show: true
         }
+      },
+
+      onPassDialogClosed () {},
+
+      showPassDialog (item) {
+        this.showPassImg = [CONSTANTS.LYCEUM_URL + item.requestImg]
+        setTimeout(this.showViewer)
+      },
+
+      showViewer () {
+        this.$viewer.show()
       },
 
       toggleExpand (props) {

@@ -24,13 +24,6 @@ export default {
 
     return Vue
       .axios
-      .post(CONSTANTS.LYCEUM_URL + pupil._id, data)
-      .then(sentStatusToFile)
-
-    function sentStatusToFile (res) {
-      return Vue
-        .axios
-        .post(CONSTANTS.BASE_URL + 'pupils/' + pupil._id, data)
-    }
+      .post(CONSTANTS.BASE_URL + 'pupils/' + pupil._id, data)
   }
 }

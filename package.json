@@ -13,8 +13,11 @@
   "dependencies": {
     "axios": "^0.18.0",
     "debounce": "^1.1.0",
+    "img-vuer": "^0.9.22",
+    "v-viewer": "^1.0.1",
     "vue": "^2.5.2",
     "vue-axios": "^2.0.2",
+    "vue-img-view": "^1.0.3",
     "vue-router": "^3.0.1",
     "vuetify": "^1.0.0"
   },

@@ -12,7 +12,17 @@
               <br/>
               <b>{{EXAM_STATUSES[pupil.examStatus]}}</b>
             </span>
+            <br/>
+            <v-btn  @click="toggleShowPass"
+                    dark 
+                    color="teal">
+                <v-icon left dark>face</v-icon>
+                Справка
+            </v-btn>
             </v-flex>
+
+            
+            
             <v-btn icon 
                     absolute
                     right
@@ -42,6 +52,10 @@
     methods: {
       toggleEdit () {
         this.$emit('toggleEdit', this.pupil)
+      },
+
+      toggleShowPass () {
+        this.$emit('toggleShowPass', this.pupil)
       },
 
       getPhone (phone) {
