@@ -1,6 +1,6 @@
 const CONSTANTS = {
- // BASE_URL: 'https://lyceumexams.herokuapp.com/api/',
-  BASE_URL: 'http://localhost:5000/api/',
+  BASE_URL: 'https://lyceumexams.herokuapp.com/api/',
+ // BASE_URL: 'http://localhost:5000/api/',
   LYCEUM_URL: 'http://lyceum.by/images/pupils/',
 
   NONE_PLACE: {
