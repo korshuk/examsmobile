@@ -1,6 +1,5 @@
 <template>
   <v-app>
-    
     <v-navigation-drawer
       fixed
       temporary
@@ -90,6 +89,7 @@
 </template>
 
 <script>
+import Preloader from '@/plugins/preloader/Preloader'
 import apiService from '@/services/apiService'
 import dictionaryService from '@/services/dictionaryService'
 
@@ -160,6 +160,10 @@ export default {
     onSuccess (response) {
       this.corpses = response.data
       this.DICTIONARY = dictionaryService.getters.DICTIONARY()
+
+      setTimeout(function () {
+        Preloader.onLoaded()
+      }, 6000)
     },
 
     onError (error) {

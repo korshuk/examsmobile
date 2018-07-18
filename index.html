@@ -28,6 +28,20 @@
     <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
   </head>
   <body>
+    <div id="app-preloader" 
+        class="initial-preloader" 
+        style="display:none" 
+        v-bind:class="{ 'loading-start': isActive }"
+        v-bind:style="elementStyles">
+        <div class="logo-container">
+          <div class="logo-img-container">
+            <img class="logo-img" :src="logo.urlBW" width="150" height="200">
+            <img class="logo-img logo-img-complete" :src="logo.urlFull" width="150" height="200">
+          </div>
+          <div class="loading-progress"></div>
+        </div>
+      </div>
+
     <div id="app"></div>
     <!-- built files will be auto injected -->
   </body>

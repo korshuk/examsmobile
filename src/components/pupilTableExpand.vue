@@ -59,7 +59,7 @@
       },
 
       getPhone (phone) {
-        const x = phone.replace(/\D/g, '').match(/(\d{3})(\d{2})(\d{3})(\d{2})(\d{2})/)
+        const x = phone ? phone.replace(/\D/g, '').match(/(\d{3})(\d{2})(\d{3})(\d{2})(\d{2})/) : ['X', 'X', 'X', 'X', 'X', 'X']
 
         return `${x[1]}-(${x[2]})-${x[3]}-${x[4]}-${x[5]} `
       }
